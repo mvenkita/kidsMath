@@ -8,13 +8,62 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import shamir from "shamir";
 
 const ModularApp = () => {
-  // Modular Arithmetic State
-  const [num1, setNum1] = useState('');
-  const [num2, setNum2] = useState('');
-  const [prime, setPrime] = useState('');
-  const [operation, setOperation] = useState('add');
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+
+  const [userAnswer, setUserAnswer] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [score, setScore] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+
+  // Sound effect references
+  const correctSoundRef = useRef(null);
+  const incorrectSoundRef = useRef(null);
+
+  const generateNewProblem = () => {
+    const newNum1 = Math.floor(Math.random() * 10);
+    const newNum2 = Math.floor(Math.random() * 10);
+    setNum1(newNum1);
+    setNum2(newNum2);
+    setUserAnswer('');
+    setFeedback('');
+  };
+
+  const checkAnswer = () => {
+    const correctAnswer = num1 + num2;
+    const parsedUserAnswer = parseInt(userAnswer);
+
+    setTotalQuestions(prev => prev + 1);
+
+    if (parsedUserAnswer === correctAnswer) {
+      setFeedback('Correct! 🎉');
+      setScore(prev => prev + 1);
+      
+      // Play correct sound if enabled
+      if (isSoundEnabled && correctSoundRef.current) {
+        correctSoundRef.current.currentTime = 0;
+        correctSoundRef.current.play();
+      }
+    } else {
+      setFeedback(`Incorrect. The correct answer is ${correctAnswer}. Try again! 🤔`);
+      
+      // Play incorrect sound if enabled
+      if (isSoundEnabled && incorrectSoundRef.current) {
+        incorrectSoundRef.current.currentTime = 0;
+        incorrectSoundRef.current.play();
+      }
+    }
+  };
+
+  // Toggle sound on/off
+  const toggleSound = () => {
+    setIsSoundEnabled(prev => !prev);
+  };
+
+  // Initialize first problem on component mount
+  useEffect(() => {
+    generateNewProblem();
+  }, []);
+
   const [secret, setSecret] = useState("");
   const [primeNum, setPrimeNum] = useState("");
   const [shares, setShares] = useState([]);
@@ -26,66 +75,6 @@ const ModularApp = () => {
   // SHA256 Hashing State
   const [inputString, setInputString] = useState('');
   const [hashedOutput, setHashedOutput] = useState('');
-
-  // Modular Arithmetic Calculations
-  const isPrime = (n) => {
-    if (n <= 1) return false;
-    for (let i = 2; i <= Math.sqrt(n); i++) {
-      if (n % i === 0) return false;
-    }
-    return true;
-  };
-
-  const calculate = () => {
-    setError('');
-    setResult(null);
-
-    const a = parseInt(num1);
-    const b = parseInt(num2);
-    const p = parseInt(prime);
-
-    if (isNaN(a) || isNaN(b) || isNaN(p)) {
-      setError('Please enter valid numbers');
-      return;
-    }
-
-    if (!isPrime(p)) {
-      setError('Modulus must be a prime number');
-      return;
-    }
-
-    let calcResult;
-    switch (operation) {
-      case 'add':
-        calcResult = (a + b) % p;
-        break;
-      case 'subtract':
-        calcResult = (((a - b) % p) + p) % p;
-        break;
-      case 'multiply':
-        calcResult = (a * b) % p;
-        break;
-      case 'divide':
-        const findInverse = (a, m) => {
-          for (let x = 1; x < m; x++) {
-            if ((a * x) % m === 1) return x;
-          }
-          return null;
-        };
-        const inverse = findInverse(b, p);
-        if (inverse === null) {
-          setError('Division not possible (no multiplicative inverse)');
-          return;
-        }
-        calcResult = (a * inverse) % p;
-        break;
-      default:
-        setError('Invalid operation');
-        return;
-    }
-
-    setResult(calcResult);
-  };
 
   // SHA256 Hashing Function
   const calculateSHA256 = async () => {
@@ -349,102 +338,66 @@ const ModularApp = () => {
         </TabsList>
         
         <TabsContent value="modular-arithmetic">
-          <Card>
-            <CardHeader>
-              <CardTitle>Modular Arithmetic Calculator</CardTitle>
-            </CardHeader>
-            <CardContent>
+      <audio ref={correctSoundRef} src="/api/sounds/correct.mp3" preload="auto" />
+      <audio ref={incorrectSoundRef} src="/api/sounds/incorrect.mp3" preload="auto" />
 
-              <Accordion type="single" collapsible className="w-full mb-4">
-                <AccordionItem value="introduction">
-                  <AccordionTrigger>What is Modular Arithmetic?</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="text-sm space-y-2">
-                      <p>
-                        Modular arithmetic is like a mathematical clock where numbers "wrap around" after reaching a certain point (the modulus). 
-                        When using a prime number as the modulus, we create a special mathematical structure called a finite field.
-                      </p>
-                      
-                      <h3 className="font-semibold mt-2">Key Characteristics:</h3>
-                      <ul className="list-disc pl-5">
-                        <li>Uses a prime number p as the "clock face"</li>
-                        <li>Contains integers {"{0, 1, 2, ..., p-1}"}</li>
-                        <li>All arithmetic operations are performed modulo p</li>
-                      </ul>
+      <Card className="w-full max-w-md mx-auto mt-10">
+        <CardHeader className="relative">
+          <CardTitle className="text-center">Addition Practice</CardTitle>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleSound} 
+            className="absolute right-0 top-1/2 -translate-y-1/2"
+          >
+            {isSoundEnabled ? <Volume2 /> : <VolumeX />}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="text-center text-2xl font-bold">
+              {num1} + {num2} = ?
+            </div>
 
-                      <h3 className="font-semibold mt-2">Operations Examples (mod 7):</h3>
-                      <div className="bg-gray-100 p-2 rounded">
-                        <p>Addition: 3 + 5 = 8 ≡ 1 (mod 7)</p>
-                        <p>Multiplication: 3 * 4 = 12 ≡ 5 (mod 7)</p>
-                        <p>Subtraction: 3 - 5 = -2 ≡ 5 (mod 7)</p>
-                      </div>
+            <Input 
+              type="number" 
+              value={userAnswer} 
+              onChange={(e) => setUserAnswer(e.target.value)}
+              placeholder="Enter your answer"
+              className="text-center text-xl"
+            />
 
-                      <p className="mt-2">
-                        Applications include cryptography, error correction, and computer security algorithms.
-                      </p>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+            <div className="flex space-x-4">
+              <Button 
+                onClick={checkAnswer} 
+                className="w-full"
+                variant="default"
+              >
+                Check Answer
+              </Button>
+              <Button 
+                onClick={generateNewProblem} 
+                className="w-full"
+                variant="secondary"
+              >
+                Next Problem
+              </Button>
+            </div>
 
-            <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-2">
-                  <Input 
-                    type="number" 
-                    placeholder="First Number" 
-                    value={num1} 
-                    onChange={(e) => setNum1(e.target.value)}
-                  />
-                  <Select 
-                    value={operation} 
-                    onValueChange={setOperation}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="add">+</SelectItem>
-                      <SelectItem value="subtract">-</SelectItem>
-                      <SelectItem value="multiply">×</SelectItem>
-                      <SelectItem value="divide">÷</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input 
-                    type="number" 
-                    placeholder="Second Number" 
-                    value={num2} 
-                    onChange={(e) => setNum2(e.target.value)}
-                  />
-                </div>
-                
-                <Input 
-                  type="number" 
-                  placeholder="Prime Modulus" 
-                  value={prime} 
-                  onChange={(e) => setPrime(e.target.value)}
-                />
-                
-                <Button 
-                  onClick={calculate} 
-                  className="w-full"
-                >
-                  Calculate
-                </Button>
-                
-                {error && (
-                  <div className="text-red-500 text-center">
-                    {error}
-                  </div>
-                )}
-                
-                {result !== null && (
-                  <div className="text-center text-xl font-bold">
-                    Result: {result}
-                  </div>
-                )}
+            {feedback && (
+              <div className={`text-center text-xl font-semibold ${
+                feedback.includes('Correct') ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {feedback}
               </div>
-            </CardContent>
-          </Card>
+            )}
+
+            <div className="text-center text-lg">
+              Score: {score} / {totalQuestions}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
         </TabsContent>
  
         <TabsContent value="sha256-hash">
