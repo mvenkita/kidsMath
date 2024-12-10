@@ -328,7 +328,7 @@ const ModularApp = () => {
   };
 
   // Utility to compute the SHA256 hash using the Web Crypto API
-  const sha256 = async (data: string): Promise<string> => {
+  const sha256v2 = async (data: string): Promise<string> => {
     const encoder = new TextEncoder();
     const hashBuffer = await window.crypto.subtle.digest("SHA-256", encoder.encode(data));
     const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -337,7 +337,7 @@ const ModularApp = () => {
 
   // Function to compute the Merkle Tree
   const computeMerkleTree = async (leaves: string[]): Promise<string[][]> => {
-    const hashedLeaves = await Promise.all(leaves.map(sha256));
+    const hashedLeaves = await Promise.all(leaves.map(sha256v2));
     let tree: string[][] = [hashedLeaves];
 
     while (tree[tree.length - 1].length > 1) {
@@ -346,7 +346,7 @@ const ModularApp = () => {
       for (let i = 0; i < currentLayer.length; i += 2) {
         const left = currentLayer[i];
         const right = currentLayer[i + 1] || left; // Handle odd leaves by duplicating
-        nextLayer.push(await sha256(left + right));
+        nextLayer.push(await sha256v2(left + right));
       }
       tree.push(nextLayer);
     }
