@@ -9,7 +9,8 @@ import shamir from "shamir";
 import { Volume2, VolumeX } from 'lucide-react';
 
 const ModularApp = () => {
-
+  const [num1, setNum1] = useState(0);
+  const [num2, setNum2] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
