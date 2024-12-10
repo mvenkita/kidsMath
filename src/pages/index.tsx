@@ -340,8 +340,8 @@ const ModularApp = () => {
         </TabsList>
         
         <TabsContent value="modular-arithmetic">
-      <audio ref={correctSoundRef} src="https://mvenkita.github.io/kidsMath/api/sounds/correct.mp3?raw=true" preload="auto" />
-      <audio ref={incorrectSoundRef} src="https://mvenkita.github.io/kidsMath/api/sounds/incorrect.mp3?raw=true" preload="auto" />
+      <audio ref={correctSoundRef} src="https://github.com/mvenkita/kidsMath/blob/main/api/sounds/correct.mp3?raw=true" preload="auto" />
+      <audio ref={incorrectSoundRef} src="https://github.com/mvenkita/kidsMath/blob/main/api/sounds/incorrect.mp3?raw=true" preload="auto" />
 
       <Card className="w-full max-w-md mx-auto mt-10">
         <CardHeader className="relative">
