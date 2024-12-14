@@ -106,15 +106,6 @@ const ModularApp = () => {
     }
   };
 
-  // Toggle sound on/off
-  const toggleSound = () => {
-    setIsSoundEnabled(prev => !prev);
-  };
-
-  // Initialize first problem on component mount
-  useEffect(() => {
-    generateNewProblem();
-  }, []);
 
   // Toggle sound on/off
   const toggleSound = () => {
@@ -124,6 +115,7 @@ const ModularApp = () => {
   // Initialize first problem on component mount
   useEffect(() => {
     generateNewProblem();
+    generateNewSubProblem();
   }, []);
 
 
