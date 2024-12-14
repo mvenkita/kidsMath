@@ -55,6 +55,66 @@ const ModularApp = () => {
       }
     }
   };
+  const [minuend, setMinuend] = useState(0);
+  const [subtrahend, setSubtrahend] = useState(0);
+  //const [userAnswer, setUserAnswer] = useState('');
+  //const [feedback, setFeedback] = useState('');
+  //const [score, setScore] = useState(0);
+  //const [totalQuestions, setTotalQuestions] = useState(0);
+  //const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+
+
+  const generateNewSubProblem = () => {
+    // Minuend between 0 and 19
+    const newMinuend = Math.floor(Math.random() * 20);
+    // Subtrahend between 0 and 9
+    const newSubtrahend = Math.floor(Math.random() * 10);
+    
+    // Ensure subtrahend is not larger than minuend
+    const adjustedMinuend = Math.max(newMinuend, newSubtrahend);
+    const adjustedSubtrahend = Math.min(newMinuend, newSubtrahend);
+
+    setMinuend(adjustedMinuend);
+    setSubtrahend(adjustedSubtrahend);
+    setUserAnswer('');
+    setFeedback('');
+  };
+
+  const checkSubAnswer = () => {
+    const correctAnswer = minuend - subtrahend;
+    const parsedUserAnswer = parseInt(userAnswer);
+
+    setTotalQuestions(prev => prev + 1);
+
+    if (parsedUserAnswer === correctAnswer) {
+      setFeedback('Correct! 🎉');
+      setScore(prev => prev + 1);
+      
+      // Play correct sound if enabled
+      if (isSoundEnabled && correctSoundRef.current) {
+        correctSoundRef.current.currentTime = 0;
+        correctSoundRef.current.play();
+      }
+    } else {
+      setFeedback(`Incorrect. The correct answer is ${correctAnswer}. Try again! 🤔`);
+      
+      // Play incorrect sound if enabled
+      if (isSoundEnabled && incorrectSoundRef.current) {
+        incorrectSoundRef.current.currentTime = 0;
+        incorrectSoundRef.current.play();
+      }
+    }
+  };
+
+  // Toggle sound on/off
+  const toggleSound = () => {
+    setIsSoundEnabled(prev => !prev);
+  };
+
+  // Initialize first problem on component mount
+  useEffect(() => {
+    generateNewProblem();
+  }, []);
 
   // Toggle sound on/off
   const toggleSound = () => {
@@ -105,8 +165,8 @@ const ModularApp = () => {
       
       <Tabs defaultValue="modular-arithmetic" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="modular-arithmetic">Modular Arithmetic</TabsTrigger>
-          <TabsTrigger value="sha256-hash">SHA256 Hash</TabsTrigger>
+          <TabsTrigger value="modular-arithmetic">Addition</TabsTrigger>
+          <TabsTrigger value="subtraction">Subtraction</TabsTrigger>
         </TabsList>
         
         <TabsContent value="modular-arithmetic">
@@ -173,36 +233,63 @@ const ModularApp = () => {
         </TabsContent>
  
         <TabsContent value="sha256-hash">
-          <Card>
-            <CardHeader>
-              <CardTitle>SHA256 Hash Generator</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Input 
-                  placeholder="Enter string to hash" 
-                  value={inputString}
-                  onChange={(e) => setInputString(e.target.value)}
-                />
-                
-                <Button 
-                  onClick={calculateSHA256} 
-                  className="w-full"
-                >
-                  Generate Hash
-                </Button>
-                
-                {hashedOutput && (
-                  <div className="break-words">
-                    <strong>Hash:</strong> 
-                    <span className="block bg-gray-100 p-2 rounded mt-2">
-                      {hashedOutput}
-                    </span>
-                  </div>
-                )}
+    <Card className="w-full max-w-md mx-auto mt-10">
+        <CardHeader className="relative">
+          <CardTitle className="text-center">Subtraction Practice</CardTitle>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleSound} 
+            className="absolute right-0 top-1/2 -translate-y-1/2"
+          >
+            {isSoundEnabled ? <Volume2 /> : <VolumeX />}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="text-center text-2xl font-bold">
+              {minuend} - {subtrahend} = ?
+            </div>
+
+            <Input 
+              type="number" 
+              value={userAnswer} 
+              onChange={(e) => setUserAnswer(e.target.value)}
+              placeholder="Enter your answer"
+              className="text-center text-xl"
+            />
+
+            <div className="flex space-x-4">
+              <Button 
+                onClick={checkSubAnswer} 
+                className="w-full"
+                variant="default"
+              >
+                Check Answer
+              </Button>
+              <Button 
+                onClick={generateNewSubProblem} 
+                className="w-full"
+                variant="secondary"
+              >
+                Next Problem
+              </Button>
+            </div>
+
+            {feedback && (
+              <div className={`text-center text-xl font-semibold ${
+                feedback.includes('Correct') ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {feedback}
               </div>
-            </CardContent>
-          </Card>
+            )}
+
+            <div className="text-center text-lg">
+              Score: {score} / {totalQuestions}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
         </TabsContent>
           
         </Tabs>
