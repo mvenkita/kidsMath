@@ -224,7 +224,7 @@ const ModularApp = () => {
       </Card>
         </TabsContent>
  
-        <TabsContent value="sha256-hash">
+        <TabsContent value="subtraction">
     <Card className="w-full max-w-md mx-auto mt-10">
         <CardHeader className="relative">
           <CardTitle className="text-center">Subtraction Practice</CardTitle>
