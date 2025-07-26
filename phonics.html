@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonetic Splitting Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e1e8ff;
+        }
+
+        .section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #4facfe;
+            background: #f7faff;
+        }
+
+        .upload-area.dragover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+            transform: scale(1.02);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f7faff;
+        }
+
+        .game-area {
+            text-align: center;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .word-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin: 20px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .word-image {
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .word-image:hover {
+            transform: scale(1.05);
+        }
+
+        .splitting-input {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .sound-input {
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 1.2rem;
+            text-align: center;
+            min-width: 80px;
+            transition: all 0.3s ease;
+        }
+
+        .sound-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+
+        .game-button {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2d3748;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .game-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #68d391;
+        }
+
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #718096;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .word-display {
+                font-size: 2rem;
+            }
+            
+            .splitting-input {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Phonetic Splitting Game</h1>
+            <p>Upload your CSV file and test your phonetic knowledge!</p>
+        </div>
+        
+        <div class="content">
+            <!-- CSV Loading Section -->
+            <div class="section">
+                <h2>📁 Load Data</h2>
+                <div class="upload-area">
+                    <p id="loadStatus">📄 Click to load phonics data from phonics.csv</p>
+                    <button class="upload-button" id="loadDataButton">
+                        Load Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Table Section -->
+            <div class="section" id="tableSection" style="display: none;">
+                <h2>📊 Loaded Data</h2>
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Word</th>
+                                <th>Phonetic Splitting</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Game Section -->
+            <div class="section" id="gameSection" style="display: none;">
+                <h2>🎮 Phonetic Splitting Game</h2>
+                <div class="game-area">
+                    <div class="score">Score: <span id="scoreValue">0</span></div>
+                    
+                    <div id="gameContent">
+                        <div class="word-display" id="currentWord"></div>
+                        <img id="wordImage" class="word-image" style="display: none;" />
+                        <div id="splittingContainer"></div>
+                        <button class="game-button" id="checkButton">Check Answer</button>
+                        <button class="game-button" id="nextButton" style="display: none;">Next Word</button>
+                        <div id="feedback" class="feedback" style="display: none;"></div>
+                    </div>
+                    
+                    <button class="game-button" id="startButton">Start Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let csvData = [];
+        let currentQuestion = null;
+        let score = 0;
+        let gameActive = false;
+
+        // Load data from local CSV file
+        const loadDataButton = document.getElementById('loadDataButton');
+        const loadStatus = document.getElementById('loadStatus');
+
+        loadDataButton.addEventListener('click', loadPhonicsCsvData);
+
+        async function loadPhonicsCsvData() {
+            try {
+                loadStatus.textContent = '⏳ Loading phonics.csv...';
+                loadDataButton.disabled = true;
+                
+                const response = await fetch('phonics.csv');
+                if (!response.ok) {
+                    throw new Error(`Failed to load phonics.csv: ${response.status} ${response.statusText}`);
+                }
+                
+                const csvText = await response.text();
+                parseCSV(csvText);
+                
+                loadStatus.textContent = '✅ Successfully loaded phonics data!';
+                loadDataButton.textContent = 'Data Loaded';
+                
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                loadStatus.textContent = '❌ Error: Could not load phonics.csv. Make sure the file exists in the same folder.';
+                loadDataButton.disabled = false;
+                alert('Could not load phonics.csv. Please make sure the file exists in the same directory as this HTML file.');
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            csvData = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line) {
+                    const parts = line.split(',').map(part => part.trim());
+                    if (parts.length >= 2) {
+                        const word = parts[0];
+                        const sounds = parts.slice(1).filter(sound => sound !== '');
+                        csvData.push({ word, sounds });
+                    }
+                }
+            }
+
+            if (csvData.length > 0) {
+                displayTable();
+                document.getElementById('gameSection').style.display = 'block';
+            } else {
+                alert('No valid data found in the CSV file.');
+            }
+        }
+
+        function displayTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            csvData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.word}</td>
+                    <td>${row.sounds.join(' - ')}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            document.getElementById('tableSection').style.display = 'block';
+        }
+
+        function startGame() {
+            if (csvData.length === 0) {
+                alert('Please load the phonics data first.');
+                return;
+            }
+
+            gameActive = true;
+            score = 0;
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('startButton').style.display = 'none';
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (csvData.length === 0) return;
+
+            // Pick random word
+            currentQuestion = csvData[Math.floor(Math.random() * csvData.length)];
+            
+            // Display word
+            document.getElementById('currentWord').textContent = currentQuestion.word;
+            
+            // Try to load image
+            const wordImage = document.getElementById('wordImage');
+            wordImage.src = `${currentQuestion.word}.jpeg`;
+            wordImage.style.display = 'block';
+            wordImage.onerror = () => {
+                wordImage.style.display = 'none';
+            };
+
+            // Create input boxes for sounds
+            createSoundInputs(currentQuestion.sounds.length);
+            
+            // Reset UI
+            document.getElementById('checkButton').style.display = 'inline-block';
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        function createSoundInputs(count) {
+            const container = document.getElementById('splittingContainer');
+            container.innerHTML = '<div class="splitting-input" id="soundInputs"></div>';
+            
+            const inputsDiv = document.getElementById('soundInputs');
+            for (let i = 0; i < count; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'sound-input';
+                input.placeholder = `Sound ${i + 1}`;
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        checkAnswer();
+                    }
+                });
+                inputsDiv.appendChild(input);
+            }
+        }
+
+        function checkAnswer() {
+            if (!currentQuestion) return;
+
+            const inputs = document.querySelectorAll('.sound-input');
+            const userAnswers = Array.from(inputs).map(input => input.value.trim().toLowerCase());
+            const correctAnswers = currentQuestion.sounds.map(sound => sound.toLowerCase());
+
+            let isCorrect = true;
+            if (userAnswers.length !== correctAnswers.length) {
+                isCorrect = false;
+            } else {
+                for (let i = 0; i < userAnswers.length; i++) {
+                    if (userAnswers[i] !== correctAnswers[i]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'block';
+
+            if (isCorrect) {
+                score++;
+                document.getElementById('scoreValue').textContent = score;
+                feedback.textContent = '🎉 Correct! Well done!';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.innerHTML = `❌ Incorrect. The correct answer is: <strong>${correctAnswers.join(' - ')}</strong>`;
+                feedback.className = 'feedback incorrect';
+            }
+
+            document.getElementById('checkButton').style.display = 'none';
+            document.getElementById('nextButton').style.display = 'inline-block';
+        }
+
+        // Event listeners
+        document.getElementById('startButton').addEventListener('click', startGame);
+        document.getElementById('checkButton').addEventListener('click', checkAnswer);
+        document.getElementById('nextButton').addEventListener('click', nextQuestion);
+    </script>
+</body>
+</html>
