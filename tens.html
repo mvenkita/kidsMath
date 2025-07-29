@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Value Learning Game</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .score {
+            font-size: 1.5em;
+            color: #38a169;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .round-info {
+            font-size: 1.2em;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+
+        .image-display {
+            background: #f7fafc;
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 350px;
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            overflow-x: auto;
+        }
+
+        .game-image {
+            width: 320px;
+            height: 320px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease-in;
+            margin: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .input-section {
+            margin: 30px 0;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            height: 50px;
+            font-size: 1.5em;
+            text-align: center;
+            border: 3px solid #cbd5e0;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .label {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .tens-label {
+            color: #38a169;
+        }
+
+        .ones-label {
+            color: #dd6b20;
+        }
+
+        button {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .next-btn:hover {
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .feedback {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #9ae6b4;
+        }
+
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+
+        .number-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #4a5568;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🔢 Place Value Game</h1>
+        <div class="instructions">
+            Count the tens (groups of 10) and ones, then enter your answers below!
+        </div>
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="round-info">Round <span id="round">1</span></div>
+        
+        <div class="number-display" id="numberDisplay" style="display: none;"></div>
+        
+        <div class="image-display" id="imageDisplay">
+            <!-- Images will be displayed here -->
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <div class="input-container">
+                    <input type="number" id="tensInput" min="0" max="6" placeholder="?">
+                    <span class="label tens-label">tens</span>
+                </div>
+                <div class="input-container">
+                    <input type="number" id="onesInput" min="0" max="9" placeholder="?">
+                    <span class="label ones-label">ones</span>
+                </div>
+            </div>
+            
+            <button onclick="submitAnswer()" id="submitBtn">Submit</button>
+            <button onclick="nextRound()" id="nextBtn" class="next-btn" style="display: none;">Next</button>
+        </div>
+        
+        <div id="feedback" class="feedback" style="display: none;"></div>
+    </div>
+
+    <script>
+        let currentNumber = 0;
+        let score = 0;
+        let round = 1;
+        let answered = false;
+
+        function generateRound() {
+            // Pick random number from 1 to 60
+            currentNumber = Math.floor(Math.random() * 60) + 1;
+            
+            const tens = Math.floor(currentNumber / 10);
+            const ones = currentNumber % 10;
+            
+            // Don't display the actual number - students must figure it out from images
+            // document.getElementById('numberDisplay').textContent = currentNumber;
+            
+            // Clear previous images
+            const imageDisplay = document.getElementById('imageDisplay');
+            imageDisplay.innerHTML = '';
+            
+            // Add tens images (tens.jpg)
+            for (let i = 0; i < tens; i++) {
+                const tensImg = document.createElement('img');
+                tensImg.src = 'tens.jpg';
+                tensImg.alt = 'Tens';
+                tensImg.className = 'game-image';
+                tensImg.onerror = function() {
+                    // Fallback if image doesn't load
+                    this.style.display = 'none';
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'image-placeholder tens-image';
+                    placeholder.textContent = 'TENS';
+                    placeholder.style.width = '320px';
+                    placeholder.style.height = '320px';
+                    placeholder.style.background = 'linear-gradient(45deg, #48bb78, #38a169)';
+                    placeholder.style.borderRadius = '10px';
+                    placeholder.style.display = 'flex';
+                    placeholder.style.alignItems = 'center';
+                    placeholder.style.justifyContent = 'center';
+                    placeholder.style.color = 'white';
+                    placeholder.style.fontWeight = 'bold';
+                    placeholder.style.margin = '10px';
+                    this.parentNode.replaceChild(placeholder, this);
+                };
+                imageDisplay.appendChild(tensImg);
+            }
+            
+            // Add ones images ([number].jpg)
+            if (ones > 0) {
+                const onesImg = document.createElement('img');
+                onesImg.src = `${ones}.jpg`;
+                onesImg.alt = `${ones}`;
+                onesImg.className = 'game-image';
+                onesImg.onerror = function() {
+                    // Fallback if image doesn't load
+                    this.style.display = 'none';
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'image-placeholder ones-image';
+                    placeholder.textContent = `${ones}`;
+                    placeholder.style.width = '320px';
+                    placeholder.style.height = '320px';
+                    placeholder.style.background = 'linear-gradient(45deg, #ed8936, #dd6b20)';
+                    placeholder.style.borderRadius = '10px';
+                    placeholder.style.display = 'flex';
+                    placeholder.style.alignItems = 'center';
+                    placeholder.style.justifyContent = 'center';
+                    placeholder.style.color = 'white';
+                    placeholder.style.fontWeight = 'bold';
+                    placeholder.style.margin = '10px';
+                    this.parentNode.replaceChild(placeholder, this);
+                };
+                imageDisplay.appendChild(onesImg);
+            }
+            
+            // Clear inputs and feedback
+            document.getElementById('tensInput').value = '';
+            document.getElementById('onesInput').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            
+            // Reset buttons
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'none';
+            answered = false;
+            
+            // Update round display
+            document.getElementById('round').textContent = round;
+        }
+
+        function submitAnswer() {
+            if (answered) return;
+            
+            const tensInput = parseInt(document.getElementById('tensInput').value);
+            const onesInput = parseInt(document.getElementById('onesInput').value);
+            
+            if (isNaN(tensInput) || isNaN(onesInput)) {
+                alert('Please enter numbers in both boxes!');
+                return;
+            }
+            
+            const correctTens = Math.floor(currentNumber / 10);
+            const correctOnes = currentNumber % 10;
+            
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'block';
+            
+            if (tensInput === correctTens && onesInput === correctOnes) {
+                score++;
+                document.getElementById('score').textContent = score;
+                feedback.textContent = 'Correct! 🎉';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = `Incorrect! The answer was ${correctTens} tens and ${correctOnes} ones.`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            answered = true;
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        function nextRound() {
+            round++;
+            generateRound();
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !answered) {
+                submitAnswer();
+            } else if (e.key === 'Enter' && answered) {
+                nextRound();
+            }
+        });
+
+        // Start the first round
+        generateRound();
+    </script>
+</body>
+</html>
